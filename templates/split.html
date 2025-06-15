@@ -1,0 +1,143 @@
+<html>
+
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-image: url("/static/money5.jpg");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        .box {
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 60px;
+            border-radius: 10px;
+            color: white;
+            max-width: 900px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        input,
+        button {
+            padding: 10px;
+            margin: 10px;
+            font-size: 16px;
+        }
+
+        h1 {
+            font-size: 50px;
+            text-shadow: 2px 2px 5px rgb(23, 1, 58);
+        }
+
+        .box1 {
+            width: 500px;
+            border: 5px solid black;
+            border-radius: 15%;
+            margin: auto;
+            background-color: rgb(13, 13, 14);
+        }
+
+        li {
+            font-size: larger;
+        }
+
+        h3 {
+            font-size: 40px;
+        }
+    </style>
+</head>
+
+<body>
+    <center>
+        <h1>BILL SPLIT-UP AMONG FRIENDS</h1><br>
+
+        <div class="box">
+            <div class="subBox">
+                <label for="total"><b>ENTER THE TOTAL BILL</b></label>
+                <input id="total" type="number"><br><br>
+            </div>
+            <div class="subBox">
+                <label for="people"><b>ENTER THE NUMBER OF PEOPLE</b></label>
+                <input id="people" type="number"><br><br>
+            </div>
+
+            <div id="number"></div>
+
+            <button type="button" onclick="generate()">GENERATE</button><br><br>
+
+            <div id="result" class="hidden">
+                <div class="box1">
+                    <div id="amountDetails"></div>
+                </div><br>
+            </div>
+        </div>
+
+    </center>
+    <script>
+        function generate() {
+            const a = document.getElementById("people").value;
+            const b = document.getElementById("number");
+            for (let i = 1; i <= a; i++) {
+                b.innerHTML += `
+                    <label for="person${i}">Person ${i}</label>
+                    <input id="person${i}" type="text"><br><br>
+                    <label for="amount${i}">Amount ${i}</label>
+                    <input id="amount${i}" type="number"><br><br>
+                `;
+            }
+            b.innerHTML += '<button type="button" id="hello">Submit</button><br><br>';
+            document.getElementById("hello").addEventListener('click', result);
+        }
+
+        function result() {
+            const c = document.getElementById("people").value;
+            const d = parseFloat(document.getElementById("total").value);
+            let names = [];
+            let amounts = [];
+            let totalSpent = 0;
+
+            for (let i = 1; i <= c; i++) {
+                const name = document.getElementById(`person${i}`).value;
+                const amount = parseFloat(document.getElementById(`amount${i}`).value);
+                names.push(name);
+                amounts.push(amount);
+                totalSpent += amount;
+            }
+
+            // Calculate remaining balance to be paid equally
+            const remainingBalance = d - totalSpent;
+            const equalShare = (remainingBalance / c).toFixed(2);
+
+            let amountpay = [];
+            for (let i = 0; i < amounts.length; i++) {
+                // Add the equal share of the remaining balance to the amount paid by each person
+                const finalAmount = (amounts[i] + parseFloat(equalShare)).toFixed(2);
+                amountpay.push(finalAmount);
+            }
+
+            document.getElementById("result").style.display = 'block';
+
+            display(names, amountpay);
+        }
+
+        function display(names, amountpay) {
+            const f = document.getElementById("amountDetails");
+            f.innerHTML = '<h2>Amount Each Person Needs to Pay:</h2><ul><br>';
+            for (let i = 0; i < names.length; i++) {
+                f.innerHTML += `
+                    <li><strong>${names[i]}:</strong> ₹${amountpay[i]}</li>
+                `;
+            }
+        }
+    </script>
+</body>
+
+</html>

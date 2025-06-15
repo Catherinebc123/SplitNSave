@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bucket List Savings</title>
+  <style>
+   body {
+    background-color: antiquewhite;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    margin: 0;
+    min-height: 100vh;
+    text-align: center;
+  }
+    h1 {
+      color: #050805;
+      font-size: 430%;
+    }
+    input[type="number"],
+    input[type="text"] {
+      padding: 10px;
+      width: 200px;
+      font-size: 16px;
+      margin: 5px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin-left: 10px;
+      cursor: pointer;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+    }
+    button:disabled {
+      background-color: #999;
+      cursor: not-allowed;
+    }
+    .box-container {
+      margin-top: 15px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+    }
+    .box {
+      background-color: #4CAF50;
+      color: white;
+      padding: 15px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      user-select: none;
+      transition: background-color 0.3s ease;
+    }
+    .box.clicked {
+      background-color: #999;
+      text-decoration: line-through;
+      cursor: default;
+    }
+    #remaining {
+      font-size: 20px;
+      margin-top: 20px;
+      margin-bottom: 40px;
+    }
+    .goal {
+      border: 1px solid #ccc;
+      padding: 20px;
+      margin-bottom: 20px;
+      text-align: left;
+      background: white;
+      border-radius: 8px;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    p{
+      font-size: 18px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h1>✨ Bucket List Savings ✨</h1>
+
+  <p>Welcome, {{ session['username'] }} | <a href="{{ url_for('logout') }}">Logout</a></p>
+
+  <h2>Create New Savings Goal</h2>
+  <input type="number" id="goalAmount" placeholder="Enter amount to save" min="1" />
+  <input type="text" id="goalDesc" placeholder="Enter description (e.g., Buy a Phone)" />
+  <button id="createGoalBtn">Create Goal</button>
+
+  <hr />
+
+  <h2>🗂️ Your Savings Goals</h2>
+
+  {% if goals %}
+    {% for goal in goals %}
+      <div class="goal" data-goal-id="{{ goal.id }}">
+        <h3>🎯 {{ goal.goal_description }}</h3>
+        <p><strong>Created:</strong> {{ goal.created_at }}</p>
+        <p><strong>Target:</strong> ₹{{ goal.goal_amount }} |
+           <strong>Remaining:</strong> <span class="remaining-amount">₹{{ goal.remaining }}</span></p>
+        <div class="box-container">
+          {% for val in goal.boxes %}
+            {% set idx = loop.index0 %}
+            <div class="box {% if idx in goal.clicked_indexes %}clicked{% endif %}" data-index="{{ idx }}">
+              ₹{{ val }}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>No savings goals yet. Create one above!</p>
+  {% endif %}
+
+<script>
+  document.getElementById('createGoalBtn').addEventListener('click', async () => {
+    const amountInput = document.getElementById('goalAmount');
+    const descInput = document.getElementById('goalDesc');
+
+    const goal_amount = parseInt(amountInput.value);
+    const goal_description = descInput.value.trim();
+
+    if (!goal_amount || goal_amount <= 0) {
+      alert('Please enter a valid positive amount.');
+      return;
+    }
+    if (!goal_description) {
+      alert('Please enter a description.');
+      return;
+    }
+
+    const res = await fetch('/create_goal', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({goal_amount, goal_description})
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      alert('Goal created successfully! Reloading page...');
+      window.location.reload();
+    } else {
+      alert('Error: ' + data.error);
+    }
+  });
+
+  // For each goal, add click listeners on boxes
+  document.querySelectorAll('.goal').forEach(goalElem => {
+    const goalId = goalElem.dataset.goalId;
+    const boxes = [...goalElem.querySelectorAll('.box')];
+    let clickedIndexes = boxes
+      .map((box, idx) => box.classList.contains('clicked') ? idx : -1)
+      .filter(idx => idx !== -1);
+    let boxValues = boxes.map(box => parseInt(box.textContent.replace('₹','')));
+    let remainingAmount = parseInt(goalElem.querySelector('.remaining-amount').textContent.replace('₹',''));
+
+    boxes.forEach((box, idx) => {
+      if (!box.classList.contains('clicked')) {
+        box.addEventListener('click', async () => {
+          if (clickedIndexes.includes(idx)) return;
+
+          clickedIndexes.push(idx);
+          box.classList.add('clicked');
+
+          remainingAmount -= boxValues[idx];
+          if (remainingAmount < 0) remainingAmount = 0;
+
+          goalElem.querySelector('.remaining-amount').textContent = '₹' + remainingAmount;
+
+          // Save progress via AJAX
+          const res = await fetch('/update_progress/' + goalId, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+              clicked_indexes: clickedIndexes,
+              remaining_amount: remainingAmount
+            })
+          });
+
+          const data = await res.json();
+          if (!res.ok) {
+            alert('Error saving progress: ' + data.error);
+          }
+        });
+      }
+    });
+  });
+</script>
+</body>
+</html>

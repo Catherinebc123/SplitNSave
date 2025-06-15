@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Money</title>
+    <style>
+        body {
+            background-image: url("/static/m2.jpg");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            font-size: 70px;
+            text-align: center;
+            text-shadow: 2px 2px 5px rgb(23, 1, 58);
+            font-weight: bold;
+            padding: 20px;
+            background: rgba(180, 179, 179, 0.6);
+            border-radius: 10px;
+            margin: 20px 90px 30px 90px;
+            color: #071e52;
+        }
+
+        .box1 {
+            background-color: rgba(4, 4, 4, 0.5);
+            padding: 20px 50px;
+            border-radius: 10px;
+            margin-left: 30px;
+            margin-right: 500px;
+        }
+
+        .box2 {
+            background-color: rgba(13, 13, 13, 0.5);
+            padding: 20px 50px;
+            border-radius: 10px;
+            margin-top: 50px;
+            margin-left: 400px;
+            max-width: 900px;
+        }
+
+        p {
+            font-size: 17px;
+            color: white;
+        }
+
+        h2 {
+            color: white;
+            text-align: center;
+            font-size: 35px;
+        }
+        .features-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            padding: 30px 20px;
+        }
+        
+        .feature-card {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            width: 280px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s, box-shadow 0.3s;
+            color: white;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7);
+        }
+
+        .feature-card img {
+            width: 100%;
+            height: 180px;
+            border-radius: 10px;
+            object-fit: cover;
+            margin-bottom: 15px;
+        }
+
+        .feature-card h3 {
+            text-align: center;
+            font-size: 22px;
+            color: #030303;
+            margin-bottom: 10px;
+        }
+
+        .feature-card ul {
+            list-style-type: disc;
+            padding-left: 20px;
+            color: #060606;
+        }
+
+        .feature-card ul li {
+            margin-bottom: 8px;
+        }
+
+        .feature-card a {
+            text-decoration: none;
+            color: #0a0a0a;
+            font-weight: bold;
+        }
+
+        .feature-card a:hover {
+            text-decoration: underline;
+        }
+        
+    </style>
+</head>
+<body>
+    <h1>SplitNSave</h1>
+
+    <div class="box1">
+        <h2>ABOUT SplitNSave</h2>
+        <p>
+            SplitNSave is an all-in-one financial tool designed to make managing group expenses and savings easy and hassle-free. 
+            Whether you're sharing a meal with friends, planning a trip, or saving for your next big adventure.<br><br>
+            With SplitNSave, you can enjoy seamless expense tracking, simplify shared costs, and stay on top of your savings—all in one convenient app. 
+            Say goodbye to financial stress and start splitting and saving smarter today!
+        </p>
+    </div>
+
+    <div class="box2">
+        <h2>FEATURES OF SplitNSave</h2>
+        <p>
+            SplitNSave simplifies the process with three powerful features:<br><br>
+
+            <strong>Bill Splitter:</strong> No more awkward calculations or confusion when splitting bills! This feature allows you to effortlessly divide expenses between friends, ensuring everyone pays their fair share. You can add expenses, adjust amounts, and even calculate tips to make settling up quick and easy.<br><br>
+
+            <strong>Trip Expense Calculator:</strong> Planning a getaway? SplitNSave helps you budget and manage your trip expenses. From transportation to meals, this feature lets you track costs and splits, so you can easily see how much each person owes for the entire trip, keeping everyone on the same page.<br><br>
+
+            <strong>Bucket List Savings:</strong> Dreaming of a future goal? Whether it's a vacation, a new gadget, or a special event, the Bucket List Savings tool helps you set savings goals, track progress, and stay motivated. SplitNSave lets you allocate funds to different goals, making it easier to plan and save for your dreams.<br><br>
+
+            <strong>Travel Planner:</strong>This feature offers a free, interactive travel planner that generates a day-long itinerary based on your entered destination and budget.Distributes your budget across activities like breakfast, sightseeing, lunch, movies, snacks, and transport using predefined weights.<br><br>
+        </p>
+    </div>
+
+    <!-- Carousel Section -->
+    <h2 style="
+  font-size: 2.8em;
+  font-weight: 800;
+  text-align: center;
+  color: #1a1a1a;
+  background: linear-gradient(90deg, #0a0a0a, #0072ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.15);
+  letter-spacing: 1px;
+  margin-bottom: 30px;
+">
+  Explore the Core Features of SplitNSave
+</h2>
+        <div class="features-container">
+            <div class="feature-card">
+                <img src="/static/money5.jpg" alt="Bill Splitup">
+                <h3>Bill Splitter</h3>
+                <ul>
+                    <li><b>Instantly divide group expenses.</b></li>
+                    <li><b>Perfect for dining out, parties, and shared bills.</b></li>
+                </ul>
+                <a href="{{ url_for('split') }}">Try Bill Splitter</a>
+            </div>
+
+            <div class="feature-card">
+                <img src="/static/trip.jpg" alt="Trip Expense Tracker">
+                <h3>Trip Expense Tracker</h3>
+                <ul>
+                    <li><b>Split transportation, accommodation, food, and more.</b></li>
+                    <li><b>Keeps the group financially aligned and stress-free.</b></li>
+                </ul>
+                <a href="{{ url_for('es') }}">Plan a Trip</a>
+            </div>
+
+            <div class="feature-card">
+                <img src="/static/bbbb.jpg" alt="Bucket List Savings">
+                <h3>Bucket List Savings</h3>
+                <ul>
+                    <li><b>Create and manage multiple savings goals.</b></li>
+                    <li><b>Real-Time Remaining Balance Updates</b></li>
+                </ul>
+                <a href="{{ url_for('login') }}">Start Saving</a>
+            </div>
+
+            <div class="feature-card">
+                <img src="/static/world.jpg" alt="Bucket List Savings">
+                <h3>Travel Planner</h3>
+                <ul>
+                    <li><b> Budget-Based Planning</b></li>
+                    <li><b>Interactive Map Integration</b></li>
+                </ul>
+                <a href="{{ url_for('index') }}">Travel Plan</a>
+            </div>
+        </div>
+
+
+</body>
+</html>

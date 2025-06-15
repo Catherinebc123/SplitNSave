@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Free Travel Planner with Real POIs</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    crossorigin=""
+  />
+  <style>
+     body {
+              background-image: url("/static/world.jpg");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            margin: 0;
+            min-height: 100vh;
+            }
+    body { font-family: Arial; text-align: center; padding: 20px; }
+    #map { height: 400px; margin: 20px auto; width: 90%; max-width: 600px; }
+    input, button { padding:8px; font-size:16px; margin:4px; }
+    .schedule { max-width:600px; margin:0 auto; text-align:left; }
+    .schedule p { margin:4px 0; }
+  </style>
+</head>
+<body>
+
+  <h1>Travel Planner</h1>
+  <input id="place" placeholder="Enter a place (e.g., Munnar)" />
+  <input id="budget" type="number" placeholder="Budget" />
+  <button onclick="generate()">Go</button>
+
+  <div id="output" class="schedule"></div>
+  <div id="map"></div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script>
+    // Initialize map
+    const map = L.map('map').setView([20.5937, 78.9629], 5);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+    let markers = [];
+
+    // Nominatim geocoding
+    async function geocode(place) {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(place)}`;
+      const resp = await fetch(url);
+      const data = await resp.json();
+      if (data.length) {
+        return { lat:+data[0].lat, lng:+data[0].lon, name:data[0].display_name };
+      }
+      throw new Error('Place not found');
+    }
+
+    // Overpass query helper
+    async function findPOI(lat, lng, key, value, radius=5000) {
+      const query = `
+        [out:json][timeout:25];
+        (
+          node["${key}"="${value}"](around:${radius},${lat},${lng});
+          way["${key}"="${value}"](around:${radius},${lat},${lng});
+          relation["${key}"="${value}"](around:${radius},${lat},${lng});
+        );
+        out center 1;
+      `;
+      const url = 'https://overpass-api.de/api/interpreter';
+      const resp = await fetch(url, {
+        method: 'POST',
+        body: query,
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+      });
+      const json = await resp.json();
+      if (json.elements && json.elements.length) {
+        // pick the first element
+        const el = json.elements[0];
+        const name = el.tags.name || `${value}`;
+        const coord = el.type==='node'
+          ? { lat: el.lat, lng: el.lon }
+          : { lat: el.center.lat, lng: el.center.lon };
+        return { name, location: coord };
+      }
+      throw new Error(`${value} not found`);
+    }
+
+    // Main generate function
+    async function generate() {
+      const place = document.getElementById('place').value.trim();
+      const budget = +document.getElementById('budget').value;
+      if (!place || !budget) {
+        alert('Please enter both place and budget');
+        return;
+      }
+
+      // clear old markers and output
+      markers.forEach(m => map.removeLayer(m));
+      markers = [];
+      document.getElementById('output').innerHTML = '';
+
+      // categories with OSM tags
+      const cats = [
+        { icon:'🍽️', label:'Breakfast', key:'amenity', value:'restaurant', weight:0.15 },
+        { icon:'🥾', label:'Activity',  key:'tourism',  value:'attraction', weight:0.25 },
+        { icon:'🍛', label:'Lunch',     key:'amenity',  value:'restaurant', weight:0.20 },
+        { icon:'🎬', label:'Movie',     key:'amenity',  value:'cinema',     weight:0.20 },
+        { icon:'🍦', label:'Snacks',    key:'amenity',  value:'cafe',       weight:0.10 },
+        { icon:'🚕', label:'Transport', key:'amenity',  value:'taxi',       weight:0.10 },
+      ];
+
+      // geocode place
+      let center;
+      try {
+        center = await geocode(place);
+      } catch (e) {
+        document.getElementById('output').innerHTML = `<p style="color:red">${e.message}</p>`;
+        return;
+      }
+
+      // header
+      let html = `<h2>📍 ${center.name}</h2><p>💰 Budget: ₹${budget}</p>`;
+      document.getElementById('output').innerHTML = html;
+
+      // center map
+      map.setView([center.lat, center.lng], 13);
+
+      // place central marker
+      const main = L.marker([center.lat, center.lng])
+        .addTo(map)
+        .bindPopup(`<b>${center.name}</b>`);
+      markers.push(main);
+
+      // for each category, find a POI
+      for (let cat of cats) {
+        const cost = Math.round(budget * cat.weight);
+        try {
+          const poi = await findPOI(center.lat, center.lng, cat.key, cat.value);
+          html += `<p>${cat.icon} ${cat.label}: ₹${cost} – ${poi.name}</p>`;
+          const m = L.marker([poi.location.lat, poi.location.lng])
+            .addTo(map)
+            .bindPopup(`${cat.label}<br>${poi.name}<br>₹${cost}`);
+          markers.push(m);
+        } catch (err) {
+          html += `<p>${cat.icon} ${cat.label}: ₹${cost} – <i>${cat.value} not found nearby</i></p>`;
+        }
+      }
+
+      document.getElementById('output').innerHTML = html;
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trip Expense Calculator</title>
+   <style>
+    body{
+        background-image: url("/static/trip.jpg");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            margin: 0;
+            min-height: 100vh;
+            
+    }
+  .hi{
+    margin-top: 120px;
+  }
+  .box {
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 60px;
+            border-radius: 10px;
+            color: bisque;
+            max-width: 500px;
+        }
+  input,button{
+    padding: 10px;
+            margin: 10px;
+            font-size: 16px;
+            border-radius: 15px 15px 15px;
+
+  }
+  h1{
+    color: black;
+    font-size: 35px;
+  }
+  p{
+    font-size: 25px;
+    color: bisque;
+  }
+    </style>
+</head>
+<body>
+    <center>
+        <div class="hi">
+            <div class="box">
+        <h1>Trip Expense Calculator</h1>
+
+        <div class="expense-form">
+            <div id="activities-list">
+                
+            </div>
+            <label><b>Do yoy want to add new activity</b></label>
+            <button onclick="addActivity()">Add Activity</button><br><br>
+
+            <label for="numPeople"><b>Number of People:</b> </label>
+            <input type="number" id="numPeople" placeholder="Enter number of people" /><br><br>
+        </div>
+
+        <button onclick="calculateTotal()">Calculate Total</button>
+
+        <div class="result">
+            <p><b>Total Expense: </b><span id="totalExpense">0</span></p>
+            <p><b>Each Person Pays: </b><span id="perPerson">0</span></p>
+        </div>
+    </div>
+    </div>
+    </center>
+
+    <script>
+       
+
+let activities = [];
+
+function addActivity() {
+    
+    const activityDiv = document.createElement("div");
+    activityDiv.classList.add("activity-container");
+
+    
+    const activityNameInput = document.createElement("input");
+    activityNameInput.classList.add("activity-input");
+    activityNameInput.placeholder = "Activity Name";
+
+    
+    const activityCostInput = document.createElement("input");
+    activityCostInput.classList.add("activity-input");
+    activityCostInput.placeholder = "Activity Cost";
+    activityCostInput.type = "number";
+
+    
+    const removeButton = document.createElement("button");
+    removeButton.innerText = "Remove";
+    removeButton.onclick = function() {
+        activities.splice(activities.indexOf(activityDiv), 1); // Remove from activities array
+        activityDiv.remove(); // Remove from DOM
+        calculateTotal(); // Recalculate the total
+    };
+
+   
+    activityDiv.appendChild(activityNameInput);
+    activityDiv.appendChild(activityCostInput);
+    activityDiv.appendChild(removeButton);
+
+    // Add to the activities list
+    document.getElementById("activities-list").appendChild(activityDiv);
+
+    // Store this activity div in the activities array
+    activities.push(activityDiv);
+}
+
+function calculateTotal() {
+    
+    const numPeople = parseInt(document.getElementById('numPeople').value) || 1; // Default to 1 if no input
+
+    
+    let totalExpense = 0;
+
+    
+    activities.forEach(function(activityDiv) {
+        const activityCost = parseFloat(activityDiv.querySelectorAll('input')[1].value) || 0;
+        totalExpense += activityCost;
+    });
+
+    
+    const perPerson = totalExpense / numPeople;
+
+   
+    document.getElementById('totalExpense').textContent = totalExpense.toFixed(2);
+    document.getElementById('perPerson').textContent = perPerson.toFixed(2);
+}
+
+    </script>
+</body>
+</html>
